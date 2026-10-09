@@ -1,0 +1,32 @@
+{
+  "$schema": "https://z-tools.top/schema/plugin-v2.json",
+  "schema": 2,
+  "id": "com.example.hello-ztools",
+  "name": "hello-ztools",
+  "title": "Hello ZTools（最小示例）",
+  "version": "1.0.0",
+  "author": "ZTools-Tauri Plugin Repo",
+  "description": "最小可运行的插件骨架：一个 over 指令、剪贴板读写、私有存储与系统通知，用来对照文档快速上手。",
+  "logo": "logo.png",
+  "runtime": {
+    "type": "webview",
+    "entry": "index.html"
+  },
+  "development": {
+    "entry": "http://127.0.0.1:15180"
+  },
+  "permissions": [
+    "storage.read",
+    "storage.write",
+    "clipboard.read",
+    "clipboard.write",
+    "notification.show"
+  ],
+  "features": [
+    {
+      "code": "hello.upper",
+      "label": "Hello：输入转大写",
+      "cmds": [{ "type": "over", "label": "转大写", "minLength": 1, "maxLength": 500 }]
+    }
+  ]
+}

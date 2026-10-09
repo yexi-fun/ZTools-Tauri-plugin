@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>文本工具箱</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="head">
+      <h1>文本工具箱</h1>
+      <p class="hint" id="enter-summary">等待主面板唤入…</p>
+    </header>
+
+    <section class="panel">
+      <div class="row">
+        <label for="source">源文本</label>
+        <span class="hint" id="source-stats"></span>
+      </div>
+      <textarea id="source" rows="5" spellcheck="false" placeholder="主面板输入的文本会带进来；也可以点「读剪贴板」"></textarea>
+      <div class="buttons">
+        <button type="button" id="btn-read">读剪贴板</button>
+        <button type="button" id="btn-apply-enter">对载入文本执行</button>
+        <button type="button" id="btn-open-url">用浏览器打开</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <label>操作</label>
+        <span class="hint">对源文本执行，结果在下方</span>
+      </div>
+      <div class="buttons" id="operations">
+        <button type="button" data-op="upper">转大写</button>
+        <button type="button" data-op="lower">转小写</button>
+        <button type="button" data-op="clean">清理空白 / 空行</button>
+        <button type="button" data-op="dedup">行去重</button>
+        <button type="button" data-op="reverse">反转行序</button>
+        <button type="button" data-op="stats">统计</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <label>结果</label>
+        <span class="hint" id="result-stats"></span>
+      </div>
+      <textarea id="result" rows="5" spellcheck="false" placeholder="（还没有结果）"></textarea>
+      <div class="buttons">
+        <button type="button" id="btn-copy">写回剪贴板</button>
+        <button type="button" id="btn-apply-result">结果设为源文本</button>
+        <button type="button" id="btn-history">最近结果（私有存储）</button>
+      </div>
+    </section>
+
+    <pre id="log"></pre>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

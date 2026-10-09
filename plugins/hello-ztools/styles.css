@@ -1,0 +1,93 @@
+/*
+ * 插件页面样式。
+ *
+ * 设计令牌（`--bg-color` / `--text-color` / `--primary-color` …）由宿主在插件
+ * webview 上注入，跟随用户在设置里选的主题与明暗模式；插件只要用这些变量，
+ * 就能自动和宿主保持一致，不必自己判断深浅色。
+ */
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 12px 14px 16px;
+  background: var(--bg-color, #ffffff);
+  color: var(--text-color, #1f2329);
+  font:
+    13px/1.6 system-ui,
+    'Microsoft YaHei',
+    sans-serif;
+}
+
+.head h1 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.hint {
+  margin: 4px 0 0;
+  color: var(--text-secondary, #6b7280);
+  font-size: 12px;
+}
+
+.panel {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color, rgb(0 0 0 / 8%));
+  border-radius: 8px;
+  background: var(--control-bg, rgb(0 0 0 / 2%));
+}
+
+.panel h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+pre {
+  margin: 0;
+  max-height: 160px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+button {
+  border: 1px solid var(--control-border, rgb(0 0 0 / 12%));
+  border-radius: 6px;
+  background: var(--bg-color, #fff);
+  color: inherit;
+  cursor: pointer;
+  padding: 5px 10px;
+  font: inherit;
+}
+
+button:hover {
+  border-color: var(--primary-color, #059669);
+  color: var(--primary-color, #059669);
+}
+
+#log {
+  max-height: 200px;
+}
+
+.ok {
+  color: var(--primary-color, #059669);
+}
+
+.error {
+  color: #d9534f;
+}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>速记本</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="head">
+      <h1>速记本</h1>
+      <p class="hint" id="enter-summary">等待主面板唤入…</p>
+    </header>
+
+    <section class="panel">
+      <div class="row">
+        <label for="note">待写入内容</label>
+        <span class="hint" id="note-stats"></span>
+      </div>
+      <textarea id="note" rows="4" spellcheck="false" placeholder="主面板输入会带进来；也可以从剪贴板拉取"></textarea>
+      <div class="buttons">
+        <button type="button" id="btn-clip">读剪贴板</button>
+        <button type="button" id="btn-write-clip">写回剪贴板</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <label>笔记文件</label>
+        <span class="hint" id="file-hint">未选择（首次选择会请求文件读写授权）</span>
+      </div>
+      <div class="buttons">
+        <button type="button" id="btn-choose">选择 / 新建笔记…</button>
+        <button type="button" id="btn-append">追加写入</button>
+        <button type="button" id="btn-read">读取内容</button>
+        <button type="button" id="btn-forget">清除所选文件</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <label>预览</label>
+        <span class="hint" id="preview-stats"></span>
+      </div>
+      <pre id="preview">（还没有内容）</pre>
+    </section>
+
+    <pre id="log"></pre>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

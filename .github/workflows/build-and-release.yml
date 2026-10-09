@@ -1,0 +1,107 @@
+﻿# 构建并发布插件：push 到 main 时，只构建本次有改动的插件，
+# 把 `.zpx` 与市场清单（plugins.json / categories.json）作为 GitHub Release 资产上传。
+#
+# 与参考仓库 ZToolsCenter/ZTools-plugins 的流程一致，差异只有"产物格式"：
+# 那边是 ZTools Electron 的插件 zip，这边是 ZTools-Tauri 的 `.zpx`。
+name: Build and Release Plugins
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      plugins:
+        description: '指定要构建的插件目录名，多个用逗号/空格分隔（留空=按变更检测）'
+        required: false
+        type: string
+        default: ''
+      build_all:
+        description: '构建全部插件（而不是仅构建变动的插件）'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 插件要自带 SDK：插件页面在别人的机器上跑，宿主不提供 SDK 文件。
+      # 这里从 ZTools-Tauri 的 SDK 产物同步；也可以用仓库内 vendored 的副本。
+      - name: Sync plugin SDK
+        run: |
+          if [ -d "${{ github.workspace }}/../ZTools-Tauri/packages/ztools-sdk/dist" ]; then
+            node scripts/sync-sdk.mjs --sdk "${{ github.workspace }}/../ZTools-Tauri/packages/ztools-sdk/dist"
+          else
+            node scripts/sync-sdk.mjs
+          fi
+
+      - name: Detect changed plugins
+        id: detect
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.build_all }}" = "true" ]; then
+            node scripts/detect-changes.mjs --all
+          elif [ -n "${{ inputs.plugins }}" ]; then
+            node scripts/detect-changes.mjs --plugin "${{ inputs.plugins }}"
+          else
+            node scripts/detect-changes.mjs --base HEAD~1
+          fi
+          echo "release_version=$(node -e "console.log(require('./release/build-info.json').releaseVersion)")" >> "$GITHUB_OUTPUT"
+          echo "changed=$(node -e "console.log((require('./release/build-info.json').changedPlugins||[]).join(','))")" >> "$GITHUB_OUTPUT"
+
+      # 上一次发布的市场清单：合并时用它补齐"本次没有构建的插件"，
+      # 否则只发变动插件会把其余插件从市场里挤掉。
+      - name: Fetch previous market manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release
+          gh release download --pattern plugins.json --dir release --clobber || echo "（首次发布，没有历史清单）"
+          if [ -f release/plugins.json ]; then
+            mv release/plugins.json release/plugins.previous.json
+          fi
+
+      - name: Build .zpx packages
+        env:
+          ZTOOLS_PLUGINS_REPO: ${{ github.repository }}
+        run: node scripts/build-plugins.mjs
+
+      - name: Generate market manifest
+        env:
+          ZTOOLS_PLUGINS_REPO: ${{ github.repository }}
+        run: node scripts/generate-plugins-json.mjs --release-version "${{ steps.detect.outputs.release_version }}"
+
+      - name: Verify repository
+        run: node scripts/verify.mjs
+
+      - name: Publish release
+        if: steps.detect.outputs.changed != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.detect.outputs.release_version }}
+          name: v${{ steps.detect.outputs.release_version }}
+          body: |
+            本次构建的插件：${{ steps.detect.outputs.changed }}
+
+            下载 `*.zpx` 后在 ZTools-Tauri 的「设置 → 已安装插件」里填入路径即可安装；
+            `plugins.json` 是市场清单（供市场服务与客户端读取）。
+          files: |
+            release/*.zpx
+            release/plugins.json
+            release/categories.json
+          fail_on_unmatched_files: true

@@ -1,0 +1,21 @@
+{
+  "name": "ztools-tauri-plugins",
+  "version": "1.0.0",
+  "description": "ZTools-Tauri 插件中心仓库（GitHub 公开仓库即市场源；产物为 .zpx）",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "assets": "node scripts/make-assets.mjs",
+    "detect": "node scripts/detect-changes.mjs",
+    "detect:all": "node scripts/detect-changes.mjs --all",
+    "sync:sdk": "node scripts/sync-sdk.mjs",
+    "build": "node scripts/build-plugins.mjs",
+    "generate": "node scripts/generate-plugins-json.mjs",
+    "verify": "node scripts/verify.mjs",
+    "release:local": "node scripts/sync-sdk.mjs && node scripts/build-plugins.mjs --all && node scripts/generate-plugins-json.mjs && node scripts/verify.mjs",
+    "serve": "node server/serve.mjs"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

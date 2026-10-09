@@ -1,0 +1,30 @@
+[
+  {
+    "key": "productivity",
+    "title": "效率工具",
+    "description": "提升工作学习效率",
+    "icon": "https://raw.githubusercontent.com/ZToolsCenter/ZTools-Tauri-plugin/refs/heads/main/icons/productivity.png",
+    "list": ["quick-note"]
+  },
+  {
+    "key": "text",
+    "title": "文本处理",
+    "description": "文本清洗、转换与统计",
+    "icon": "https://raw.githubusercontent.com/ZToolsCenter/ZTools-Tauri-plugin/refs/heads/main/icons/text.png",
+    "list": ["text-toolkit"]
+  },
+  {
+    "key": "development",
+    "title": "开发工具",
+    "description": "面向开发者的专业工具",
+    "icon": "https://raw.githubusercontent.com/ZToolsCenter/ZTools-Tauri-plugin/refs/heads/main/icons/development.png",
+    "list": []
+  },
+  {
+    "key": "other",
+    "title": "其他",
+    "description": "未归类与示例插件",
+    "icon": "https://raw.githubusercontent.com/ZToolsCenter/ZTools-Tauri-plugin/refs/heads/main/icons/other.png",
+    "list": ["hello-ztools"]
+  }
+]

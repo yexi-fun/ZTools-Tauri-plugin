@@ -1,0 +1,21 @@
+# 操作系统垃圾文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+.history/
+
+# 依赖
+node_modules/
+
+# 构建产物：插件包与市场清单由 CI 生成后上传到 GitHub Release，不进版本库
+# （与参考仓库 ZToolsCenter/ZTools-plugins 的做法一致）。
+release/
+!release/.gitkeep
+
+# 本地临时产物
+*.log*
+tmp/

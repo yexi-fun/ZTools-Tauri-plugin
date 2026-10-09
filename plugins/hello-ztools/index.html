@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hello ZTools</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="head">
+      <h1>Hello ZTools</h1>
+      <p class="hint">最小示例：一个 over 指令 + 剪贴板 / 存储 / 通知</p>
+    </header>
+
+    <section class="panel">
+      <h2>进入载荷</h2>
+      <pre id="enter">（等待 onEnter…）</pre>
+      <p class="hint">
+        在主面板输入「转大写」或「转大写 你的文本」，命中本插件后会带着输入文本进入这里。
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>能做什么</h2>
+      <div class="buttons">
+        <button type="button" id="btn-upper">把剪贴板内容转大写</button>
+        <button type="button" id="btn-count">累计调用次数（写入私有存储）</button>
+        <button type="button" id="btn-storage">查看私有存储</button>
+        <button type="button" id="btn-toast">发一条系统通知</button>
+        <button type="button" id="btn-exit">退出插件</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>日志</h2>
+      <pre id="log"></pre>
+    </section>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

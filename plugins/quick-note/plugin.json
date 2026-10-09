@@ -1,0 +1,45 @@
+{
+  "$schema": "https://z-tools.top/schema/plugin-v2.json",
+  "schema": 2,
+  "id": "com.example.quick-note",
+  "name": "quick-note",
+  "title": "速记本",
+  "version": "1.0.0",
+  "author": "ZTools-Tauri Plugin Repo",
+  "description": "把主面板输入或剪贴板内容追加到笔记文件：演示系统文件对话框、授权范围内的文件读写，以及高风险权限首次调用时的授权确认流程。",
+  "logo": "logo.png",
+  "runtime": {
+    "type": "webview",
+    "entry": "index.html"
+  },
+  "development": {
+    "entry": "http://127.0.0.1:15182"
+  },
+  "permissions": [
+    "storage.read",
+    "storage.write",
+    "clipboard.read",
+    "clipboard.write",
+    "dialog.open",
+    "fs.read.any",
+    "fs.write.any",
+    "notification.show"
+  ],
+  "features": [
+    {
+      "code": "note.append",
+      "label": "速记：把输入追加到笔记",
+      "cmds": [{ "type": "over", "label": "记一笔", "minLength": 1, "maxLength": 1000 }]
+    },
+    {
+      "code": "note.read",
+      "label": "速记：读取笔记文件",
+      "cmds": [{ "type": "over", "label": "看笔记", "minLength": 1, "maxLength": 1000 }]
+    },
+    {
+      "code": "note.clip",
+      "label": "速记：把剪贴板追加到笔记",
+      "cmds": [{ "type": "over", "label": "剪贴板记一笔", "minLength": 1, "maxLength": 1000 }]
+    }
+  ]
+}

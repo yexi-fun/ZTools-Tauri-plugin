@@ -1,0 +1,36 @@
+# 市场首页布局（与参考仓库 ZToolsCenter/ZTools-plugins 的 layout.yaml 同构）。
+#
+# 字段说明：
+# - banner：顶部横幅（图片 + 点击跳转）
+# - fixed：固定栏目，按插件名列举"最新发布"
+# - navigation：分类导航，categories 取 categories-mapping.json 的 key
+# - random：随机推荐，count 为展示条数
+#
+# ZTools-Tauri 侧：这份布局由市场前端（或你自建的门户）消费；
+# 宿主本身只依赖 release/plugins.json 与 release/categories.json。
+layout:
+  - type: banner
+    height: 180
+    children:
+      - image: "https://raw.githubusercontent.com/ZToolsCenter/ZTools-Tauri-plugin/refs/heads/main/icons/banner.png"
+        url: "https://github.com/ZToolsCenter/ZTools-Tauri"
+
+  - type: fixed
+    title: 最新发布
+    plugins:
+      - text-toolkit
+      - quick-note
+      - hello-ztools
+
+  - type: navigation
+    title: 开始探索
+    categories:
+      - productivity
+      - development
+      - text
+      - other
+    showDescription: true
+
+  - type: random
+    title: 随机推荐
+    count: 6

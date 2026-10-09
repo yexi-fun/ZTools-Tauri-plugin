@@ -1,0 +1,112 @@
+/* 设计令牌由宿主注入，插件跟随主题（详见 hello-ztools/styles.css 的说明）。 */
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 12px 14px 16px;
+  background: var(--bg-color, #ffffff);
+  color: var(--text-color, #1f2329);
+  font:
+    13px/1.6 system-ui,
+    'Microsoft YaHei',
+    sans-serif;
+}
+
+.head h1 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.hint {
+  color: var(--text-secondary, #6b7280);
+  font-size: 12px;
+}
+
+.panel {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color, rgb(0 0 0 / 8%));
+  border-radius: 8px;
+  background: var(--control-bg, rgb(0 0 0 / 2%));
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+label {
+  font-weight: 600;
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--control-border, rgb(0 0 0 / 12%));
+  border-radius: 6px;
+  background: var(--bg-color, #fff);
+  color: inherit;
+  padding: 6px 8px;
+  font: inherit;
+}
+
+textarea:focus {
+  border-color: var(--primary-color, #059669);
+  outline: none;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+button {
+  border: 1px solid var(--control-border, rgb(0 0 0 / 12%));
+  border-radius: 6px;
+  background: var(--bg-color, #fff);
+  color: inherit;
+  cursor: pointer;
+  padding: 5px 10px;
+  font: inherit;
+}
+
+button:hover {
+  border-color: var(--primary-color, #059669);
+  color: var(--primary-color, #059669);
+}
+
+#preview,
+#log {
+  margin: 0;
+  max-height: 150px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font:
+    12px/1.5 ui-monospace,
+    Consolas,
+    monospace;
+}
+
+#log {
+  margin-top: 12px;
+}
+
+.ok {
+  color: var(--primary-color, #059669);
+}
+
+.error {
+  color: #d9534f;
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://z-tools.top/schema/plugin-v2.json",
+  "schema": 2,
+  "id": "com.example.text-toolkit",
+  "name": "text-toolkit",
+  "title": "文本工具箱",
+  "version": "1.0.0",
+  "author": "ZTools-Tauri Plugin Repo",
+  "description": "多指令文本处理插件：大小写、清理空白、行去重、文本统计，以及识别链接后用默认浏览器打开。演示一个插件声明多个 feature 与 over/regex 两类指令。",
+  "logo": "logo.png",
+  "runtime": {
+    "type": "webview",
+    "entry": "index.html"
+  },
+  "development": {
+    "entry": "http://127.0.0.1:15181"
+  },
+  "permissions": [
+    "storage.read",
+    "storage.write",
+    "clipboard.read",
+    "clipboard.write",
+    "shell.openExternal",
+    "notification.show"
+  ],
+  "features": [
+    {
+      "code": "text.upper",
+      "label": "文本：转大写",
+      "cmds": [{ "type": "over", "label": "转大写", "minLength": 1, "maxLength": 2000 }]
+    },
+    {
+      "code": "text.lower",
+      "label": "文本：转小写",
+      "cmds": [{ "type": "over", "label": "转小写", "minLength": 1, "maxLength": 2000 }]
+    },
+    {
+      "code": "text.clean",
+      "label": "文本：清理空白与空行",
+      "cmds": [{ "type": "over", "label": "清理文本", "minLength": 1, "maxLength": 2000 }]
+    },
+    {
+      "code": "text.dedup",
+      "label": "文本：行去重",
+      "cmds": [{ "type": "over", "label": "行去重", "minLength": 1, "maxLength": 2000 }]
+    },
+    {
+      "code": "text.stats",
+      "label": "文本：统计字符/词/行",
+      "cmds": [{ "type": "over", "label": "文本统计", "minLength": 1, "maxLength": 2000 }]
+    },
+    {
+      "code": "text.open-url",
+      "label": "文本：用浏览器打开链接",
+      "cmds": [{ "type": "regex", "label": "打开链接", "match": "^https?://\\S+$" }]
+    }
+  ]
+}
