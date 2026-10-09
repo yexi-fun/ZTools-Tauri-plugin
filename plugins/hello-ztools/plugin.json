@@ -4,7 +4,7 @@
   "id": "com.example.hello-ztools",
   "name": "hello-ztools",
   "title": "Hello ZTools（最小示例）",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "ZTools-Tauri Plugin Repo",
   "description": "最小可运行的插件骨架：一个 over 指令、剪贴板读写、私有存储与系统通知，用来对照文档快速上手。",
   "logo": "logo.png",

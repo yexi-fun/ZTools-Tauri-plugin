@@ -4,7 +4,7 @@
   "id": "com.example.quick-note",
   "name": "quick-note",
   "title": "速记本",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "ZTools-Tauri Plugin Repo",
   "description": "把主面板输入或剪贴板内容追加到笔记文件：演示系统文件对话框、授权范围内的文件读写，以及高风险权限首次调用时的授权确认流程。",
   "logo": "logo.png",

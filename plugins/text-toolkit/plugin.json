@@ -4,7 +4,7 @@
   "id": "com.example.text-toolkit",
   "name": "text-toolkit",
   "title": "文本工具箱",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "ZTools-Tauri Plugin Repo",
   "description": "多指令文本处理插件：大小写、清理空白、行去重、文本统计，以及识别链接后用默认浏览器打开。演示一个插件声明多个 feature 与 over/regex 两类指令。",
   "logo": "logo.png",
