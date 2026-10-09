@@ -1,0 +1,180 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, 'Segoe UI', sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  background: #1b1c1f;
+  color: #e8e8ea;
+  font-size: 13px;
+}
+
+.head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #2c2f34;
+}
+
+/* 动作区撑满整行：分类页签靠左、清空按钮靠右（同一行的两端）。 */
+.head-actions {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* 分类页签（全部 / 文本 / 图片）：与清空按钮同一行，页签贴左、清空贴右。 */
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid #464a52;
+  border-radius: 6px;
+}
+
+.tab {
+  padding: 4px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #9aa0a6;
+}
+
+.tab:hover {
+  color: #e8e8ea;
+  background: color-mix(in srgb, var(--text-color, #e8e8ea) 10%, transparent);
+}
+
+.tab.is-active {
+  color: var(--text-color, #e8e8ea);
+  background: color-mix(in srgb, var(--text-color, #e8e8ea) 16%, transparent);
+}
+
+.count {
+  color: #9aa0a6;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+button {
+  font: inherit;
+  font-size: 12px;
+  color: #e8e8ea;
+  background: #2f3237;
+  border: 1px solid #464a52;
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #3a3e45;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 8px 10px;
+  /* 隐藏滚动条但保留滚动（滚轮 / 触控板 / 键盘仍可滚动）。 */
+  scrollbar-width: none;
+}
+
+.list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.empty {
+  margin: 24px 8px;
+  color: #9aa0a6;
+  text-align: center;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* 悬停 / 选中底色跟随宿主主题：浅色主题下是浅灰，暗色主题下是提亮一档的灰，
+   不再使用近黑色块。--text-color 由宿主 plugin_appearance.js 注入。 */
+.item:hover,
+.item.is-selected {
+  background: color-mix(in srgb, var(--text-color, #e8e8ea) 12%, transparent);
+  border-color: color-mix(in srgb, var(--text-color, #e8e8ea) 24%, transparent);
+}
+
+.item-preview {
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.5;
+  max-height: 66px;
+  overflow: hidden;
+}
+
+/* 文本条目最多两行，超出用省略号；完整内容仍可通过行的 title 提示查看。 */
+.item-preview.is-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.item-image {
+  max-height: 96px;
+  max-width: 100%;
+  border-radius: 6px;
+  background: #000;
+}
+
+.item-placeholder {
+  color: #9aa0a6;
+}
+
+.item-meta {
+  display: flex;
+  gap: 10px;
+  color: #9aa0a6;
+  font-size: 11px;
+}
+
+.badge {
+  color: #9ad7bd;
+}
+
+.foot {
+  flex-shrink: 0;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 8px 16px;
+  border-top: 1px solid #2c2f34;
+  color: #9aa0a6;
+  font-size: 11px;
+}
+
+.notice {
+  margin-left: auto;
+  color: #ff9a9a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

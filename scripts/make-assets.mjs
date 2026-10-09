@@ -37,7 +37,7 @@ function pluginLogo(glyph, background) {
   return encodePng(48, 48, canvas.pixels);
 }
 
-/** 三个示例插件的 logo 定义。 */
+/** 示例插件的 logo 定义。 */
 const PLUGIN_LOGOS = {
   'hello-ztools': {
     background: [5, 150, 105, 255],
@@ -75,6 +75,21 @@ const PLUGIN_LOGOS = {
       fillRect(canvas, 13, 14, 22, 5, WHITE);
       fillRect(canvas, 13, 22, 22, 5, WHITE);
       fillRect(canvas, 13, 30, 13, 5, WHITE);
+    }
+  },
+  clipboard: {
+    background: [8, 145, 178, 255],
+    /**
+     * 剪贴板：顶部夹子 + 白色板身 + 三条底色文本行。
+     * @param {ReturnType<typeof createCanvas>} canvas 画布。
+     * @returns {void}
+     */
+    glyph(canvas) {
+      fillRect(canvas, 19, 9, 10, 5, WHITE);
+      fillRect(canvas, 13, 14, 22, 25, WHITE);
+      fillRect(canvas, 18, 21, 12, 3, [8, 145, 178, 255]);
+      fillRect(canvas, 18, 27, 12, 3, [8, 145, 178, 255]);
+      fillRect(canvas, 18, 33, 8, 3, [8, 145, 178, 255]);
     }
   }
 };

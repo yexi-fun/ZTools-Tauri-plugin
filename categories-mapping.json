@@ -4,7 +4,7 @@
     "title": "效率工具",
     "description": "提升工作学习效率",
     "icon": "https://raw.githubusercontent.com/ZToolsCenter/ZTools-Tauri-plugin/refs/heads/main/icons/productivity.png",
-    "list": ["quick-note"]
+    "list": ["quick-note", "clipboard"]
   },
   {
     "key": "text",
