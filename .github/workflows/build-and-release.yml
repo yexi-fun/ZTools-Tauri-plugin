@@ -1,8 +1,11 @@
-# 构建并发布插件：push 到 main 时，只构建本次有改动的插件，
+# 构建并发布插件：push 到 main 时，构建本次有改动的插件（首次发布全量），
 # 把 `.zpx` 与市场清单（plugins.json / categories.json）作为 GitHub Release 资产上传。
 #
 # 与参考仓库 ZToolsCenter/ZTools-plugins 的流程一致，差异只有"产物格式"：
 # 那边是 ZTools Electron 的插件 zip，这边是 ZTools-Tauri 的 `.zpx`。
+#
+# 手动全量重发：Actions → Build and Release Plugins → Run workflow（勾选 build_all）；
+# 也可在 plugins 输入框里指定要单独构建的插件目录名。
 name: Build and Release Plugins
 
 on:
@@ -39,10 +42,9 @@ jobs:
         with:
           node-version: '20'
 
-      # 插件要自带 SDK：插件页面在别人的机器上跑，宿主不提供 SDK 文件。
-      # 仓库里已经带有 `plugins/*/vendor/ztools-sdk/`（随源码提交），因此这一步只在
-      # 能拿到 ZTools-Tauri 的 SDK 产物时才做"刷新"；拿不到就沿用仓库内的副本，
-      # 不能因此让整个发布流程失败（首次发布就是这么挂掉的）。
+      # 插件必须自带 SDK（别人的机器上宿主不提供 SDK 文件），仓库里已经提交了
+      # `plugins/*/vendor/ztools-sdk/`。这一步只在能拿到 ZTools-Tauri 的 SDK 产物时做"刷新"，
+      # 拿不到就沿用仓库内的副本——不能因为同步失败就让整条发布流程挂掉。
       - name: Sync plugin SDK
         run: |
           if [ -d "${{ github.workspace }}/../ZTools-Tauri/packages/ztools-sdk/dist" ]; then
@@ -51,6 +53,26 @@ jobs:
             node scripts/sync-sdk.mjs --sdk "${{ vars.ZTOOLS_SDK_DIST }}"
           else
             echo "未配置 SDK 来源，沿用仓库内已提交的 vendor/ztools-sdk（verify 会校验其存在）"
+          fi
+
+      # 源码级自检：清单规则、页面元素 id、分类映射（不含 release/ 产物）。
+      - name: Verify plugin sources
+        run: node scripts/verify.mjs --skip-release
+
+      # 上一次发布的市场清单：合并时用它补齐"本次没有构建的插件"，
+      # 否则只发变动插件会把其余插件从市场里挤掉。
+      - name: Fetch previous market manifest
+        id: previous
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release
+          if gh release download --pattern plugins.json --dir release --clobber 2>/dev/null; then
+            mv release/plugins.json release/plugins.previous.json
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "未找到历史 Release 清单（首次发布）"
+            echo "found=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Detect changed plugins
@@ -65,32 +87,32 @@ jobs:
           else
             node scripts/detect-changes.mjs --base HEAD~1
           fi
-          echo "release_version=$(node -e "console.log(require('./release/build-info.json').releaseVersion)")" >> "$GITHUB_OUTPUT"
-          echo "changed=$(node -e "console.log((require('./release/build-info.json').changedPlugins||[]).join(','))")" >> "$GITHUB_OUTPUT"
-
-      # 上一次发布的市场清单：合并时用它补齐"本次没有构建的插件"，
-      # 否则只发变动插件会把其余插件从市场里挤掉。
-      - name: Fetch previous market manifest
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p release
-          gh release download --pattern plugins.json --dir release --clobber || echo "（首次发布，没有历史清单）"
-          if [ -f release/plugins.json ]; then
-            mv release/plugins.json release/plugins.previous.json
+          changed=$(node -e "console.log((require('./release/build-info.json').changedPlugins||[]).join(','))")
+          # 首次发布（没有任何历史 Release）时，即使本次提交只改了 CI/脚本也要全量构建一次，
+          # 否则仓库永远产不出第一个 Release。
+          if [ -z "$changed" ] && [ "${{ steps.previous.outputs.found }}" = "false" ]; then
+            echo "首次发布：改为全量构建"
+            node scripts/detect-changes.mjs --all
+            changed=$(node -e "console.log((require('./release/build-info.json').changedPlugins||[]).join(','))")
           fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "release_version=$(node -e "console.log(require('./release/build-info.json').releaseVersion)")" >> "$GITHUB_OUTPUT"
+          echo "本次待构建：${changed:-（无）}"
 
       - name: Build .zpx packages
+        if: steps.detect.outputs.changed != ''
         env:
           ZTOOLS_PLUGINS_REPO: ${{ github.repository }}
         run: node scripts/build-plugins.mjs
 
       - name: Generate market manifest
+        if: steps.detect.outputs.changed != ''
         env:
           ZTOOLS_PLUGINS_REPO: ${{ github.repository }}
         run: node scripts/generate-plugins-json.mjs --release-version "${{ steps.detect.outputs.release_version }}"
 
       - name: Verify repository
+        if: steps.detect.outputs.changed != ''
         run: node scripts/verify.mjs
 
       - name: Publish release
@@ -103,9 +125,13 @@ jobs:
             本次构建的插件：${{ steps.detect.outputs.changed }}
 
             下载 `*.zpx` 后在 ZTools-Tauri 的「设置 → 已安装插件」里填入路径即可安装；
-            `plugins.json` 是市场清单（供市场服务与客户端读取）。
+            `plugins.json` 是市场清单（ZTools-Tauri 的插件市场直接读取它）。
           files: |
             release/*.zpx
             release/plugins.json
             release/categories.json
           fail_on_unmatched_files: true
+
+      - name: Nothing to publish
+        if: steps.detect.outputs.changed == ''
+        run: echo "本次提交没有插件改动，跳过构建与发布"
