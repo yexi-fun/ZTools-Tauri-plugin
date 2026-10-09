@@ -69,6 +69,9 @@ jobs:
           mkdir -p release
           if gh release download --pattern plugins.json --dir release --clobber 2>/dev/null; then
             mv release/plugins.json release/plugins.previous.json
+            # 增量发布只重建变动的插件，但合并后的市场清单仍会引用上一次的其它包；
+            # 把历史 `.zpx` 一并取回，`verify.mjs` 才能逐条对上包（同名资产会被原样重传）。
+            gh release download --pattern '*.zpx' --dir release --clobber 2>/dev/null || true
             echo "found=true" >> "$GITHUB_OUTPUT"
           else
             echo "未找到历史 Release 清单（首次发布）"
