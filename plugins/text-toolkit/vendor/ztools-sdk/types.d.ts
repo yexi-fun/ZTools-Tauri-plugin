@@ -865,4 +865,5 @@ export type { MarketPluginDetail } from './generated/MarketPluginDetail.js';
 export type { MarketReleaseItem } from './generated/MarketReleaseItem.js';
 export type { MarketReleases } from './generated/MarketReleases.js';
 export type { MarketProgressEvent } from './generated/MarketProgressEvent.js';
+export type { MarketSourceInfo } from './generated/MarketSourceInfo.js';
 //# sourceMappingURL=types.d.ts.map
