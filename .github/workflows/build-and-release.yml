@@ -1,4 +1,4 @@
-﻿# 构建并发布插件：push 到 main 时，只构建本次有改动的插件，
+# 构建并发布插件：push 到 main 时，只构建本次有改动的插件，
 # 把 `.zpx` 与市场清单（plugins.json / categories.json）作为 GitHub Release 资产上传。
 #
 # 与参考仓库 ZToolsCenter/ZTools-plugins 的流程一致，差异只有"产物格式"：
@@ -40,13 +40,17 @@ jobs:
           node-version: '20'
 
       # 插件要自带 SDK：插件页面在别人的机器上跑，宿主不提供 SDK 文件。
-      # 这里从 ZTools-Tauri 的 SDK 产物同步；也可以用仓库内 vendored 的副本。
+      # 仓库里已经带有 `plugins/*/vendor/ztools-sdk/`（随源码提交），因此这一步只在
+      # 能拿到 ZTools-Tauri 的 SDK 产物时才做"刷新"；拿不到就沿用仓库内的副本，
+      # 不能因此让整个发布流程失败（首次发布就是这么挂掉的）。
       - name: Sync plugin SDK
         run: |
           if [ -d "${{ github.workspace }}/../ZTools-Tauri/packages/ztools-sdk/dist" ]; then
             node scripts/sync-sdk.mjs --sdk "${{ github.workspace }}/../ZTools-Tauri/packages/ztools-sdk/dist"
+          elif [ -n "${{ vars.ZTOOLS_SDK_DIST }}" ] && [ -d "${{ vars.ZTOOLS_SDK_DIST }}" ]; then
+            node scripts/sync-sdk.mjs --sdk "${{ vars.ZTOOLS_SDK_DIST }}"
           else
-            node scripts/sync-sdk.mjs
+            echo "未配置 SDK 来源，沿用仓库内已提交的 vendor/ztools-sdk（verify 会校验其存在）"
           fi
 
       - name: Detect changed plugins

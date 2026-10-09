@@ -82,17 +82,26 @@ if (all) {
     changedPlugins.push(name);
   }
 } else {
+  // 首次推送（仓库只有一个提交）时没有可比的基线：直接全量构建，
+  // 否则 CI 会认为"没有变动"从而永远发不出第一个 Release。
+  const hasBase = git(['rev-parse', '--verify', base]).trim() !== '';
+  if (!hasBase) {
+    console.log(`[detect] 找不到基线 ${base}（首次推送？）→ 按全量构建`);
+    changedPlugins = [...knownDirs];
+  }
   // 变更文件形如 `plugins/<目录>/...`；删除目录也要识别出来（用于从清单里剔除）。
-  const nameStatus = git(['diff', '--name-status', `${base}..HEAD`]);
+  const nameStatus = hasBase ? git(['diff', '--name-status', `${base}..HEAD`]) : '';
   if (!nameStatus.trim()) {
-    // 退回"工作区 vs HEAD"（本地手跑时的常见场景）。
-    const local = git(['status', '--porcelain']);
-    for (const line of local.split(/\r?\n/)) {
-      if (!line.trim()) continue;
-      const file = line.slice(3).trim();
-      const match = file.match(new RegExp(`^${PLUGINS_DIR_NAME}/([^/]+)/`));
-      if (match && knownDirs.has(match[1])) {
-        changedPlugins.push(match[1]);
+    if (changedPlugins.length === 0) {
+      // 退回"工作区 vs HEAD"（本地手跑时的常见场景）。
+      const local = git(['status', '--porcelain']);
+      for (const line of local.split(/\r?\n/)) {
+        if (!line.trim()) continue;
+        const file = line.slice(3).trim();
+        const match = file.match(new RegExp(`^${PLUGINS_DIR_NAME}/([^/]+)/`));
+        if (match && knownDirs.has(match[1])) {
+          changedPlugins.push(match[1]);
+        }
       }
     }
   } else {
