@@ -95,20 +95,51 @@ if (!fs.existsSync(RELEASE_DIR)) {
   process.exit(1);
 }
 
-const packages = fs
-  .readdirSync(RELEASE_DIR)
-  .filter((file) => file.endsWith('.zpx'))
-  .sort();
-if (packages.length === 0) {
-  console.error('release/ 下没有任何 .zpx，请先运行 scripts/build-plugins.mjs');
-  process.exit(1);
-}
-
 // id → 插件目录：用于回填 README / CHANGELOG / 分类。
 const pluginsByDir = new Map(listPlugins(REPO_ROOT).map((plugin) => [plugin.dirName, plugin]));
 const pluginsById = new Map(
   [...pluginsByDir.values()].map((plugin) => [plugin.manifest.id, plugin])
 );
+
+/**
+ * 选出要写进清单的包，同一个插件只保留一个。
+ *
+ * `release/` 里同时出现同一个插件的多个版本是正常的：CI 会取回上一次发布的包
+ * （`verify.mjs` 要逐条核对"本次没有重建"的插件），本地也可能留着历史版本；
+ * 而市场主键是插件 id，重复会让整份清单非法。这里按 id 去重，优先取与源码
+ * `plugin.json` 版本一致的那个包，其余版本留在 release/ 里当历史资产。
+ * @returns {string[]} 包文件名（已排序）。
+ */
+function selectPackages() {
+  const byId = new Map();
+  const unclassified = [];
+  const files = fs
+    .readdirSync(RELEASE_DIR)
+    .filter((file) => file.endsWith('.zpx'))
+    .sort();
+  for (const file of files) {
+    const manifestText = readTextFromZip(path.join(RELEASE_DIR, file), 'plugin.json');
+    const manifest = manifestText ? JSON.parse(manifestText) : null;
+    const source = manifest ? pluginsById.get(manifest.id) : undefined;
+    if (!manifest || !source) {
+      // 包里没有清单、或 plugins/ 下没有对应源码：不参与去重，交给 verify 报错。
+      unclassified.push(file);
+      continue;
+    }
+    const current = source.manifest.version === manifest.version;
+    const previous = byId.get(manifest.id);
+    if (!previous || (current && !previous.current)) {
+      byId.set(manifest.id, { file, current });
+    }
+  }
+  return [...[...byId.values()].map((item) => item.file), ...unclassified].sort();
+}
+
+const packages = selectPackages();
+if (packages.length === 0) {
+  console.error('release/ 下没有任何 .zpx，请先运行 scripts/build-plugins.mjs');
+  process.exit(1);
+}
 
 // 分类映射：`list` 里写的是**插件目录名**（与参考仓库一致），这里反查成 id。
 const categoriesMapping = JSON.parse(fs.readFileSync(CATEGORIES_MAPPING_FILE, 'utf8'));
