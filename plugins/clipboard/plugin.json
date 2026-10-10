@@ -6,6 +6,7 @@
   "title": "剪贴板",
   "version": "1.0.2",
   "author": "ZTools-Tauri",
+  "logo": "logo.png",
   "description": "外部剪贴板历史插件：搜索、粘贴（宿主写回剪贴板并按设置注入 Ctrl+V）与清空历史。剪贴板的监视、去重、裁剪与图片转换仍由宿主提供（插件只经 @ztools/sdk 调用）。",
   "runtime": {
     "type": "webview",
