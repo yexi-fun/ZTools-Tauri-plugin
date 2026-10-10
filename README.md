@@ -101,6 +101,7 @@ set ZTOOLS_MARKET_API_BASE=http://127.0.0.1:8787     # 再启动宿主
 | [`text-toolkit`](plugins/text-toolkit) | 一个插件多 feature、`over` 与 `regex`、载荷驱动 | 5 + 1 | `clipboard.*` + `shell.openExternal` |
 | [`quick-note`](plugins/quick-note) | 文件对话框、授权范围、`storage` 记忆状态 | 3 个 `over` | `fs.read.any` / `fs.write.any`（首次调用弹确认框） |
 | [`clipboard`](plugins/clipboard) | 能力留在宿主、插件只做界面（列表 / 粘贴 / 清空）、复用主面板输入框搜索、分类页签 | 无 `cmds`（按 feature `label` 进入） | `clipboard.read` / `clipboard.write`（首次调用弹确认框） |
+| [`screenshot`](plugins/screenshot) | 全屏与窗口选区、标注、复制/保存、桌面贴图与原图编辑 | `截图` | `screen.capture` / `clipboard.write` / `window.create` |
 
 ---
 

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://z-tools.top/schema/plugin-v2.json",
+  "schema": 2,
+  "id": "com.ztools.screenshot",
+  "name": "screenshot",
+  "title": "截图",
+  "logo": "logo.png",
+  "version": "1.0.3",
+  "author": "ZTools-Tauri",
+  "description": "外部截图插件：全屏冻结 → 拖选区域 → 矩形/椭圆/箭头/画笔/文本/马赛克标注 → 复制到剪贴板或保存到截图目录。",
+  "runtime": {
+    "type": "webview",
+    "entry": "index.html"
+  },
+  "permissions": ["screen.capture", "clipboard.write", "window.create"],
+  "features": [
+    {
+      "code": "screenshot.capture",
+      "label": "截图（选区 + 标注）",
+      "cmds": [{ "type": "over", "label": "截图", "minLength": 1, "maxLength": 20 }]
+    }
+  ]
+}
