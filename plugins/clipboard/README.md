@@ -1,75 +1,73 @@
-# 剪贴板
+# 剪贴板（外部插件，`com.ztools.clipboard`）
 
-剪贴板历史查看器：按「全部 / 文本 / 图片」浏览历史、单击把内容写回剪贴板、一键清空。
+剪贴板插件从"内置插件 + 宿主独立窗口"**抽离为外部插件**：与 `examples/plugins/screenshot`
+同一套做法——宿主只保留原生能力，界面与交互在插件里（标准插件窗口 + `plugin://` 协议 + SDK）。
 
-## 它能做什么
+## 分工
 
-| 能力 | 说明 |
+| 层 | 内容 |
 | --- | --- |
-| 历史列表 | 列出宿主记录的剪贴板历史（文本 + 图片）；图片条目显示缩略图、分辨率与体积 |
-| 分类浏览 | 顶部页签「全部 / 文本 / 图片」，只切换展示，不动宿主返回的原始列表 |
-| 单击粘贴 | 点任意条目 → 写回系统剪贴板；宿主再按设置决定是否注入 `Ctrl+V` |
-| 清空 | 「清空」删除全部历史（含图片文件），点击前会二次确认 |
-| 搜索 | 复用**主面板输入框**（本插件页里没有输入框），边打边过滤 |
+| 宿主（原生能力，不插件化） | 剪贴板序列号监视、历史落盘/去重/裁剪、文本/图片读写、粘贴注入 `Ctrl+V`、`CF_DIB → PNG` |
+| 宿主 → 插件（`@ztools/sdk`） | `ztools.clipboard.{history,pasteHistory,removeHistory,clearHistory,historyImage,status}`；读需 `clipboard.read`、写需 `clipboard.write`（与其它能力同级，首次调用弹窗授权） |
+| 本插件 | 列表渲染（全部 / 文本 / 图片分类页签）、**重复文本过滤（「去重」开关）**、图片缩略图、单击粘贴、清空、搜索（复用主面板输入框） |
 
-## 进入方式
+## 与"宿主独立窗口"时代的差异
 
-| 方式 | 说明 |
-| --- | --- |
-| 主面板搜索 | 输入 `剪贴板` 选中本插件的功能项；宿主另有系统项「剪贴板历史」 |
-| 全局快捷键 | 默认 `Ctrl+Alt+C`：唤出主面板并进入本插件，再按一次退出 |
+1. 窗口就是**标准插件窗口**（跟随主面板内容区），不再有 `clipboard-open` 独立窗口；
+2. 插件叠加窗口 `focusable(false)` → 搜索框改用主面板输入框
+   （`ztools.ui.setSubInput` + `onSubInputChange`，即 T7-1 的子输入框）；
+3. 插件窗口不能订阅 Tauri 事件（T7-8 白名单）→ 进入/搜索时刷新 + 1.5s 轮询；
+4. 剪贴板的 4 个开关与"粘贴后自动粘贴"**移回宿主设置窗口**（「通用」节），
+   插件页只留历史列表 + 粘贴 + 清空。
 
-## 权限
+## 界面（2026-10-09 调整后）
 
-| 权限 | 用途 | 何时要授权 |
-| --- | --- | --- |
-| `clipboard.read` | 读历史列表、图片缩略图与监视状态（`ztools.clipboard.history` / `historyImage` / `status`） | 首次调用弹一次确认框（Explicit 档） |
-| `clipboard.write` | 粘贴（写回剪贴板）与清空历史（`pasteHistory` / `clearHistory` / `removeHistory`） | 同上 |
+- 名称：插件名是**剪贴板**（`plugin.json` 的 `title` / `features[0].label`，也是插件窗口与
+  分离窗口顶栏、设置页插件列表、主面板功能结果读到的名字）；页内不再重复显示标题。
+- 顶部：一行两端——**左侧**是分类页签「全部 / 文本 / 图片」，**右侧**是「去重」开关 + 「清空」按钮
+  （清空仍在最右）。
+- 列表：**隐藏滚动条**但仍可滚动（滚轮 / 触控板 / 键盘）；文本条目最多两行、超出用省略号
+  （完整内容见行的 `title` 提示）。
+- 底栏：左侧是操作提示，右侧是「N / M 条 · 监听中」（N = 当前分类可见条数，M = 宿主历史总数）。
 
-清单里声明了权限仍会在**首次真正调用**时弹确认框（允许 / 本次允许 / 拒绝 / 永久拒绝），
-拒绝后插件收到 `permissionDenied`，界面会把错误显示在底栏而不是白屏。
+## 重复文本过滤（去重，2026-10-10）
 
-## 数据放在哪
+宿主的去重只跟**最新一条**比哈希（`ClipboardHistory::poll`），因此 `A → B → A` 这类
+序列会在历史里留下多条同内容文本。插件按条目自带的 `hash` 在**展示层**折叠：
 
-| 数据 | 位置 |
-| --- | --- |
-| 文本历史 | 宿主的文档库（`<数据目录>/store/`，文档 id `CLIPBOARD/<id>`） |
-| 图片历史 | `<数据目录>/clipboard/images/`（存**原始 CF_DIB**，缩略图按需转 PNG 经 IPC 传回） |
-| 监视 / 去重 / 裁剪的开关 | 宿主设置 →「通用 → 剪贴板」（启用、条数上限、保留天数） |
-| 粘贴后是否自动 `Ctrl+V` | 宿主设置 →「通用 → 剪贴板 → 粘贴后自动粘贴」 |
+- **默认开启**，顶部「去重」开关可随时关掉（关掉即回到"一条不落"的历史）；
+- 同一文本只保留**最新**一条（宿主列表本就是时间倒序），行内的「×N」标记表示这条文本
+  在历史里出现过 N 次（鼠标悬停看完整说明）；
+- 去重键优先用 `hash`，只有哈希缺失时才回落到"去掉首尾空白的文本"——因此
+  "看起来一样但内容不同"（例如尾部多个空格）的两条不会被误合并；
+- **图片不参与**文本去重（同内容图片仍各占一条）；
+- 折叠只发生在**插件页的渲染层**：宿主的 `items`、搜索（子输入框）、单击粘贴、
+  清空都用原始列表，条目本身没有被删除；
+- 开关状态是**页面内状态**（不落盘）：插件页在一次宿主会话里会被复用，
+  退出/重进仍保留选择；宿主禁用插件、重开应用后回到默认的「开启」。
 
-> **分工**：监视（`GetClipboardSequenceNumber` 轮询）、连续去重、条数/天数裁剪、图片转换与
-> 粘贴注入全部在**宿主**（常驻后台线程）；本插件只做界面，经 `@ztools/sdk` 调
-> `plugin_clipboard_history_*` / `plugin_clipboard_status`，不直接读宿主内部数据。
+## 安装
 
-## 界面约定
-
-- 顶部一行两端：分类页签贴左，「清空」贴右；
-- 列表**隐藏滚动条**（滚轮 / 触控板 / 键盘仍可滚动）；文本条目最多两行、超出用省略号
-  （完整内容见悬停提示）；
-- 底栏左侧是操作提示，右侧是「可见条数 / 总数 条 · 监听中」；
-- 颜色与底色跟随宿主主题（浅色 / 深色）。
-
-## 目录结构
-
-```text
-clipboard/
-  plugin.json        清单：feature `clipboard.open` + clipboard.read / clipboard.write
-  index.html         页签 / 清空 / 列表 / 底栏
-  main.js            列表渲染、分类过滤、图片缩略图、粘贴、清空、子输入框搜索
-  styles.css         跟随宿主主题
-  vendor/ztools-sdk/ 自带 SDK（由 scripts/sync-sdk.mjs 同步）
-  logo.png           图标
-  CHANGELOG.md       版本记录（市场发布说明从这里取）
+```powershell
+pnpm --filter @ztools/sdk build
+node tools/pack-plugin/sync-sdk.mjs --plugin examples/plugins/clipboard
+node tools/pack-plugin/pack.mjs examples/plugins/clipboard examples/plugins/clipboard/clipboard-1.0.2.zpx
 ```
 
-## 打包与安装
+然后：设置页 →「插件」→「导入本地插件」选 `clipboard-*.zpx` → 安装 / 更新；或主面板搜「剪贴板」。
+`Ctrl+Alt+C` 会 **唤出主面板并进入本插件**（不再是独立窗口）。
 
-```bash
-node scripts/sync-sdk.mjs
-node scripts/build-plugins.mjs --plugin clipboard
-node scripts/verify.mjs --skip-release
+## 用 dev server 调试（T7-12）
+
+本插件的清单暂时**没有** `development.entry`，要走 dev server 需先加上，例如
+`"development": { "entry": "http://127.0.0.1:15179" }`，然后：
+
+```powershell
+python -m http.server 15179 --directory examples/plugins/clipboard
+$env:ZTOOLS_PLUGIN_DEV = 'com.ztools.clipboard'    # 或 * 表示全部插件
 ```
 
-产物是 `release/com.ztools.clipboard-<版本>.zpx`；装到宿主：设置 →「已安装插件」→
-填入 `.zpx` 绝对路径 →「导入本地插件」（或走本仓库的市场联调 `server/serve.mjs`）。
+宿主启动时（仅当设置了 `ZTOOLS_PLUGIN_DEV`）会追加一个"只作用于本机回环来源 + 只给插件窗口 +
+只放行 `@ztools/sdk` 命令"的 capability，因此 dev 页面里的 `ztools.*` 与生产一致可用；
+`await ztools.ui.devtools()` 可打开本插件 webview 的开发者工具。完整步骤与机制见
+`examples/plugins/hello-ztools/README.md` 的「本地运行 / 用 dev server 调试（T7-12）」。

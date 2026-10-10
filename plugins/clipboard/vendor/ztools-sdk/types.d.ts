@@ -536,6 +536,50 @@ export interface PluginWindowOptions {
     skipTaskbar?: boolean;
     /** 显示后是否抢焦点（默认 `true`）。 */
     focus?: boolean;
+    /**
+     * 是否**不随会话结束关闭**（默认 `false`）。
+     *
+     * 截图插件的"钉在桌面"贴图窗口用它：会话 `exit` 之后窗口留在桌面上，直到用户关掉它；
+     * 插件被禁用 / 卸载时仍会一起关闭。
+     */
+    persistent?: boolean;
+    /**
+     * 建窗后是否**立即显示**（默认 `true`）。
+     *
+     * 传 `false` 时窗口建好但保持隐藏，由插件页在画面准备好后调用
+     * `ztools.window.show()` 显示 —— 用于消掉"全屏窗口先白屏、再画出内容"的闪屏。
+     * 插件页超过 5s 仍未显示时，宿主会兜底显示它。
+     */
+    visible?: boolean;
+}
+/**
+ * 原生右键菜单的一项（`ztools.ui.contextMenu` 的参数）。
+ */
+export interface ContextMenuItem {
+    /** 项 id：选中后原样返回（用来区分点了哪一项）。 */
+    id: string;
+    /** 显示文本。 */
+    label: string;
+    /** 是否在这一项**之前**插一条分隔线（第一项忽略）。 */
+    separatorBefore?: boolean;
+}
+/**
+ * 插件自建窗口的**客户区**矩形（`ztools.window.setBounds` 的参数与返回值）。
+ *
+ * 单位是**物理像素**：`x` / `y` 是客户区左上角的屏幕坐标，`width` / `height` 是客户区尺寸。
+ * 宿主会把无边框窗口的隐形边框与 DPI 折算的偏差补掉，因此这里的值就是画布实际占的矩形。
+ */
+export interface PluginWindowBounds {
+    /** 目标窗口 label；省略表示**调用方自己所在的窗口**。 */
+    label?: string;
+    /** 客户区左上角的屏幕 X（物理像素）。 */
+    x?: number;
+    /** 客户区左上角的屏幕 Y（物理像素）。 */
+    y?: number;
+    /** 客户区宽度（物理像素）。 */
+    width?: number;
+    /** 客户区高度（物理像素）。 */
+    height?: number;
 }
 /**
  * 子输入框状态补丁（`plugin_ui_sub_input` 的参数，字段全部可选）。

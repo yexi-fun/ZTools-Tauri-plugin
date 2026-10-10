@@ -1,0 +1,1 @@
+{"version":3,"file":"PluginStateChanged.d.ts","sourceRoot":"","sources":["../../src/generated/PluginStateChanged.ts"],"names":[],"mappings":"AAEA;;GAEG;AACH,MAAM,MAAM,kBAAkB,GAAG;IACjC;;OAEG;IACH,MAAM,EAAE,MAAM,GAAG,IAAI,CAAC;IACtB;;;;;OAKG;IACH,KAAK,EAAE,MAAM,CAAC;IACd;;OAEG;IACH,IAAI,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;CAAE,CAAC"}

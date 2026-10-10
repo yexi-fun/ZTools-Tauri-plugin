@@ -14,7 +14,18 @@
           <button type="button" class="tab" data-kind="text" role="tab" aria-selected="false">文本</button>
           <button type="button" class="tab" data-kind="image" role="tab" aria-selected="false">图片</button>
         </div>
-        <button type="button" id="btn-clear" title="清空全部历史（含图片文件）">清空</button>
+        <div class="head-buttons">
+          <button
+            type="button"
+            id="btn-dedupe"
+            class="is-active"
+            aria-pressed="true"
+            title="折叠重复的文本：相同内容只保留最近一条（图片不受影响）"
+          >
+            去重
+          </button>
+          <button type="button" id="btn-clear" title="清空全部历史（含图片文件）">清空</button>
+        </div>
       </div>
     </header>
 

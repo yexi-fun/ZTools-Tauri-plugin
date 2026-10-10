@@ -1,4 +1,4 @@
-import type { ClipboardItem, ClipboardStatus, DialogFileOptions, DialogMessageOptions, FeatureDescriptor, FsEntry, HttpRequestOptions, HttpResponse, InputKeyAction, InputMouseOptions, PluginFeature, PluginWindowOptions, ScreenshotCapture, ScreenshotResult, StorageEntry, SubInputPatch } from './types.js';
+import type { ClipboardItem, ContextMenuItem, ClipboardStatus, DialogFileOptions, DialogMessageOptions, FeatureDescriptor, FsEntry, HttpRequestOptions, HttpResponse, InputKeyAction, InputMouseOptions, PluginFeature, PluginWindowBounds, PluginWindowOptions, ScreenshotCapture, ScreenshotResult, StorageEntry, SubInputPatch } from './types.js';
 /**
  * 插件可调用的宿主命令表。
  *
@@ -121,6 +121,26 @@ export interface CommandMap {
             label: string;
         };
         result: null;
+    };
+    /** 显示调用方所在的插件自建窗口（需 `window.create`；配合隐藏建窗的"画好再露脸"）。 */
+    plugin_window_show: {
+        args: Record<string, never>;
+        result: null;
+    };
+    /** 移动 / 缩放本插件的自建窗口（物理像素的**客户区**矩形；只做归属校验，不走权限点）。 */
+    plugin_window_set_bounds: {
+        args: {
+            bounds?: PluginWindowBounds;
+        };
+        result: PluginWindowBounds;
+    };
+    /** 在调用方窗口上弹原生右键菜单（只做归属校验，不走权限点；取消返回 `null`）。 */
+    plugin_window_context_menu: {
+        args: {
+            items: ContextMenuItem[];
+            label?: string;
+        };
+        result: string | null;
     };
     /** 设置/更新主面板里的子输入框（T7-1；纯展示能力，无需权限点）。 */
     plugin_ui_sub_input: {

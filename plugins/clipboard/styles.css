@@ -36,7 +36,7 @@ body {
   gap: 10px;
 }
 
-/* 分类页签（全部 / 文本 / 图片）：与清空按钮同一行，页签贴左、清空贴右。 */
+/* 分类页签（全部 / 文本 / 图片）：与右侧按钮同一行，页签贴左、按钮组贴右。 */
 .tabs {
   display: flex;
   align-items: center;
@@ -44,6 +44,13 @@ body {
   padding: 2px;
   border: 1px solid #464a52;
   border-radius: 6px;
+}
+
+/* 右侧动作区（去重开关 + 清空）：两个按钮并排、贴右内边距，最右端仍是「清空」。 */
+.head-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .tab {
@@ -83,6 +90,13 @@ button {
 
 button:hover {
   background: #3a3e45;
+}
+
+/* 「去重」开关：开启时用与页签选中态同一套配色，关闭时就是普通按钮。 */
+#btn-dedupe.is-active {
+  color: var(--text-color, #e8e8ea);
+  background: color-mix(in srgb, var(--text-color, #e8e8ea) 16%, transparent);
+  border-color: color-mix(in srgb, var(--text-color, #e8e8ea) 40%, transparent);
 }
 
 .list {
@@ -158,6 +172,15 @@ button:hover {
 
 .badge {
   color: #9ad7bd;
+}
+
+/* 行内「×N」：这一条文本在历史里出现过 N 次（其余已被折叠）。 */
+.dup {
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--text-color, #e8e8ea) 26%, transparent);
+  border-radius: 999px;
+  color: var(--text-color, #e8e8ea);
+  opacity: 0.75;
 }
 
 .foot {

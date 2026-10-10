@@ -1,8 +1,8 @@
-import type { ClipboardItem, ClipboardStatus, DialogFileOptions, DialogMessageOptions, FeatureDescriptor, FsEntry, HttpRequestOptions, HttpResponse, InputKeyAction, InputMouseOptions, NotificationInput, PluginFeature, PluginWindowOptions, PluginLifecycleEvent, ScreenshotCapture, ScreenshotResult, StorageEntry, SubInputChangeHandler, SubInputOptions } from './types.js';
+import type { ClipboardItem, ClipboardStatus, DialogFileOptions, DialogMessageOptions, FeatureDescriptor, ContextMenuItem, FsEntry, HttpRequestOptions, HttpResponse, InputKeyAction, InputMouseOptions, NotificationInput, PluginFeature, PluginWindowBounds, PluginWindowOptions, PluginLifecycleEvent, ScreenshotCapture, ScreenshotResult, StorageEntry, SubInputChangeHandler, SubInputOptions } from './types.js';
 export { ZToolsApiError } from './errors.js';
 export { isBridgeAvailable, requireBridge, type ZToolsBridge } from './bridge.js';
 export { call, type CommandMap } from './commands.js';
-export type { ApiErrorKind, FeatureDescriptor, NotificationInput, NotificationOutcome, NotificationRequest, AppPathsInfo, ClipboardItem, ClipboardStatus, GeneralSettings, GeneralSettingsPatch, GlobalShortcut, GlobalShortcutState, PinnedCommand, PinnedCommands, SearchRequest, SearchResult, SettingsSnapshot, ShortcutSettings, ShortcutSettingsPatch, ShortcutStatus, PluginCmd, PluginFeature, PluginWindowOptions, PluginLifecycleEvent, MatchedFile, DroppedFile, PluginNotification, PluginRuntimeStatus, PluginStateChanged, PluginSummary, StorageEntry, LegacyDbCounts, LegacyAccountSummary, LegacyImportPreview, LegacyVerificationItem, LegacyImportReport, LegacyImportStatus, UpdateSourceConfig, UpdateSourceResult, UpdateChannelConfig, UpdateCheckResult, UpdateDownloadResult, UpdateInstallResult, UpdaterSnapshot, UpdateProgress, HttpServerConfig, HttpServerStatus, SystemInfo, FfmpegStatus, FfmpegProgress, ScreenshotCapture, ScreenshotResult, SubInputChangeHandler, SubInputOptions, SubInputPatch, SelectedContent, ExplorerWindow, BrowserWindow, AddressBarResult, MouseHookStatus, MouseLongPress, FloatingBallSettings, FloatingBallPatch, FloatingBallState, AppEntry, AppSourceCount, AppIndexStatus, MarketPlugin, MarketPluginDetail, MarketProgressEvent, MarketReleaseItem, MarketReleases, MarketSourceInfo, DialogFileOptions, DialogFilter, DialogMessageOptions, FsEntry, HttpRequestOptions, HttpResponse, InputKeyAction, InputMouseButton, InputMouseOptions, } from './types.js';
+export type { ApiErrorKind, FeatureDescriptor, NotificationInput, NotificationOutcome, NotificationRequest, AppPathsInfo, ClipboardItem, ClipboardStatus, GeneralSettings, GeneralSettingsPatch, GlobalShortcut, GlobalShortcutState, PinnedCommand, PinnedCommands, SearchRequest, SearchResult, SettingsSnapshot, ShortcutSettings, ShortcutSettingsPatch, ShortcutStatus, PluginCmd, PluginFeature, PluginWindowBounds, PluginWindowOptions, PluginLifecycleEvent, MatchedFile, DroppedFile, PluginNotification, PluginRuntimeStatus, PluginStateChanged, PluginSummary, StorageEntry, LegacyDbCounts, LegacyAccountSummary, LegacyImportPreview, LegacyVerificationItem, LegacyImportReport, LegacyImportStatus, UpdateSourceConfig, UpdateSourceResult, UpdateChannelConfig, UpdateCheckResult, UpdateDownloadResult, UpdateInstallResult, UpdaterSnapshot, UpdateProgress, HttpServerConfig, HttpServerStatus, SystemInfo, FfmpegStatus, FfmpegProgress, ScreenshotCapture, ScreenshotResult, SubInputChangeHandler, SubInputOptions, SubInputPatch, SelectedContent, ExplorerWindow, BrowserWindow, AddressBarResult, MouseHookStatus, MouseLongPress, FloatingBallSettings, FloatingBallPatch, FloatingBallState, AppEntry, AppSourceCount, AppIndexStatus, MarketPlugin, MarketPluginDetail, MarketProgressEvent, MarketReleaseItem, MarketReleases, MarketSourceInfo, DialogFileOptions, DialogFilter, DialogMessageOptions, ContextMenuItem, FsEntry, HttpRequestOptions, HttpResponse, InputKeyAction, InputMouseButton, InputMouseOptions, } from './types.js';
 /** SDK 契约版本号，随跨边界 API 的破坏性变更递增。 */
 export declare const SDK_VERSION = "0.2.0";
 /**
@@ -60,6 +60,40 @@ declare function openPluginWindow(entry: string, options?: PluginWindowOptions):
  * @throws 未声明 `window.create` 或窗口不属于本插件时抛出错误。
  */
 declare function closePluginWindow(label: string): Promise<void>;
+/**
+ * 显示**自己所在的**插件自建窗口。
+ *
+ * 配合 `open` 的 `visible: false` 使用：窗口先隐藏建好，页面把内容（如冻结帧）画完之后再调用
+ * 本方法露脸，避免"窗口先白屏、再画出内容"的闪屏。窗口由宿主按**调用方所在窗口**反查，
+ * 因此不需要传 label，插件也只能显示自己的窗口；已经显示的窗口再调无副作用。
+ *
+ * @returns 无返回值的 Promise。
+ * @throws 未声明 `window.create`、调用方不在插件自建窗口里或窗口已关闭时抛出错误。
+ */
+declare function showPluginWindow(): Promise<void>;
+/**
+ * 弹出**原生右键菜单**并返回选中项的 id（用户点空白处 / 按 Esc 取消时返回 `null`）。
+ *
+ * 为什么用原生菜单：插件窗口可能很小（截图插件的贴图可以只有几十像素宽），页面内 HTML 菜单会被
+ * 窗口边界裁掉；原生菜单不受宿主窗口限制，键盘上下键 / Esc 由系统处理。
+ *
+ * @param items 菜单项（顺序即显示顺序；可标 `separatorBefore` 插分隔线）。
+ * @returns 选中项 id；取消返回 `null`。
+ * @throws 调用方不在插件自建窗口里、或目标窗口不属于本插件时抛出错误。
+ */
+declare function contextMenu(items: ContextMenuItem[]): Promise<string | null>;
+/**
+ * 移动 / 缩放本插件的自建窗口（截图插件"钉在桌面"的贴图靠它做拖动与边缘缩放）。
+ *
+ * 参数与返回值都是**物理像素的客户区矩形**：`x` / `y` 是客户区左上角的屏幕坐标，
+ * `width` / `height` 是客户区尺寸；只传要改的字段，其余按当前值。宿主会补掉无边框窗口的
+ * 隐形边框与 DPI 折算偏差，因此返回值就是画布实际占的矩形（贴图不会被错位或拉伸）。
+ *
+ * @param bounds 目标客户区；`label` 省略时表示调用方自己所在的窗口。
+ * @returns 应用后的实际客户区。
+ * @throws 目标窗口不属于本插件、窗口已关闭或尺寸非法时抛出错误。
+ */
+declare function setPluginWindowBounds(bounds?: PluginWindowBounds): Promise<PluginWindowBounds>;
 /**
  * 读取插件私有存储。
  * @param key 键。
@@ -461,6 +495,8 @@ export declare const ztools: {
     window: {
         open: typeof openPluginWindow;
         close: typeof closePluginWindow;
+        show: typeof showPluginWindow;
+        setBounds: typeof setPluginWindowBounds;
     };
     /** 插件私有存储（`plugins/<id>/data/`，默认允许）。 */
     storage: {
@@ -489,6 +525,8 @@ export declare const ztools: {
         detach: typeof detachUI;
         /** 打开本插件 webview 的开发者工具（T7-12；仅开发模式可用）。 */
         devtools: typeof devtoolsUI;
+        /** 弹原生右键菜单（取消返回 `null`；见 {@link contextMenu}）。 */
+        contextMenu: typeof contextMenu;
     };
     /** 事件订阅。 */
     events: {
